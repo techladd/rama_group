@@ -19,16 +19,18 @@ import FileBase from 'react-file-base64'
 
 const UpdateDialog = ({ open, handleClose, prefillData, setRefresh }) => {
   const [data, setData] = useState(prefillData)
+  const [loader, setLoader] = useState(false)
   const imageUpload = async (image) => {
     const formData = new FormData()
     formData.append('file', image)
     formData.append('upload_preset', 'zqdcv17y')
     try {
+      setLoader(true)
       const res = await axios.post(
         'https://api.cloudinary.com/v1_1/dp9idaxnh/image/upload',
         formData
       )
-      console.log(res.data.secure_url)
+      setLoader(false)
       return res.data.secure_url
     } catch (err) {
       return false
@@ -156,19 +158,21 @@ const UpdateDialog = ({ open, handleClose, prefillData, setRefresh }) => {
               if (
                 type === 'image/png' ||
                 type === 'image/jpeg' ||
-                type === 'image/webp'
+                type === 'image/webp' ||
+                type === 'image'
               ) {
-                if (sizeinkb <= 150) {
+                if (sizeinkb <= 10000) {
                   const url = await imageUpload(base64)
                   setData((prev) => ({ ...prev, image: url }))
                 } else {
-                  alert('Please select  file size less than 150kb')
+                  alert('Please select  file size less than 10mb')
                 }
               } else {
-                console.log('error')
+                alert('File format is not supported ')
               }
             }}
           />
+          {loader && <p>Please wait , uploading...</p>}
         </Box>
       </DialogContent>
       <DialogActions>
